@@ -2,6 +2,44 @@ import java.util.*;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 
+abstract class Person {
+    int id;
+    String username;
+    String password;
+
+    Person(int id, String username, String password) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+    }
+
+    abstract void menu(Scanner scanner);
+}
+
+class Admin extends Person {
+
+    Admin(int id, String username, String password) {
+        super(id, username, password);
+    }
+
+    @Override
+    void menu(Scanner scanner) {
+        QuizSystem.menuAdmin(scanner);
+    }
+}
+
+class User extends Person {
+
+    User(int id, String username, String password) {
+        super(id, username, password);
+    }
+
+    @Override
+    void menu(Scanner scanner) {
+        QuizSystem.menuUser(scanner, this.id);
+    }
+}
+
 class QuizSystem {
 
     static final int ADD_QUESTION = 1;
@@ -24,28 +62,38 @@ class QuizSystem {
     static final int EXIT = 5;
 
     static class Question {
-        String quizId;
-        String question;
-        String answer;
+        private String quizId;
+        private String question;
+        private String answer;
 
         Question(String quizId, String question, String answer) {
             this.quizId = quizId;
             this.question = question;
             this.answer = answer;
         }
-    }
 
-    static class User {
-        int id;
-        String username;
-        String password;
-        boolean isAdmin;
+        public String getQuizId() {
+            return quizId;
+        }
 
-        User(int id, String username, String password, boolean isAdmin) {
-            this.id = id;
-            this.username = username;
-            this.password = password;
-            this.isAdmin = isAdmin;
+        public void setQuizId(String quizId) {
+            this.quizId = quizId;
+        }
+
+        public String getQuestion() {
+            return question;
+        }
+
+        public void setQuestion(String question) {
+            this.question = question;
+        }
+
+        public String getAnswer() {
+            return answer;
+        }
+
+        public void setAnswer(String answer) {
+            this.answer = answer;
         }
     }
 
@@ -64,7 +112,7 @@ class QuizSystem {
     }
 
     static List<Question> questions = new ArrayList<>();
-    static List<User> users = new ArrayList<>();
+    static List<Person> users = new ArrayList<>();
     static List<Result> results = new ArrayList<>();
 
     static int nextUserId = 1;
@@ -74,11 +122,11 @@ class QuizSystem {
     }
 
     static boolean authenticateAdmin(String username, String password) {
-        return users.stream().anyMatch(user -> user.username.equals(username) && user.password.equals(password) && user.isAdmin);
+        return users.stream().anyMatch(user -> user.username.equals(username) && user.password.equals(password) && user instanceof Admin);
     }
 
     static boolean authenticateUser(String username, String password) {
-        return users.stream().anyMatch(user -> user.username.equals(username) && user.password.equals(password) && !user.isAdmin);
+        return users.stream().anyMatch(user -> user.username.equals(username) && user.password.equals(password) && user instanceof User);
     }
 
     static void addQuizQuestion(String quizId, String question, String answer) {
@@ -86,75 +134,86 @@ class QuizSystem {
     }
 
     static void editQuizQuestion(Scanner scanner) {
-        System.out.print("Enter Quiz ID to edit questions: ");
-        String quizId = scanner.next();
-        scanner.nextLine();
+        try {
+            System.out.print("Enter Quiz ID to edit questions: ");
+            String quizId = scanner.next();
+            scanner.nextLine();
 
-        List<Question> quizQuestions = getQuestionsByQuizId(quizId);
-        if (quizQuestions.isEmpty()) {
-            System.out.println("No questions found for Quiz ID: " + quizId);
-            return;
-        }
+            List<Question> quizQuestions = getQuestionsByQuizId(quizId);
+            if (quizQuestions.isEmpty()) {
+                System.out.println("No questions found for Quiz ID: " + quizId);
+                return;
+            }
 
-        for (int i = 0; i < quizQuestions.size(); i++) {
-            System.out.println((i + 1) + ". " + quizQuestions.get(i).question);
-        }
+            for (int i = 0; i < quizQuestions.size(); i++) {
+                System.out.println((i + 1) + ". " + quizQuestions.get(i).question);
+            }
 
-        System.out.print("Enter the question number to edit: ");
-        int questionIndex = scanner.nextInt() - 1;
-        scanner.nextLine();
+            System.out.print("Enter the question number to edit: ");
+            int questionIndex = scanner.nextInt() - 1;
+            scanner.nextLine();
 
-        if (questionIndex >= 0 && questionIndex < quizQuestions.size()) {
-            Question question = quizQuestions.get(questionIndex);
-            System.out.print("Enter New Question: ");
-            String newQuestion = scanner.nextLine();
-            System.out.print("Enter New Answer: ");
-            String newAnswer = scanner.nextLine();
+            if (questionIndex >= 0 && questionIndex < quizQuestions.size()) {
+                Question question = quizQuestions.get(questionIndex);
+                System.out.print("Enter New Question: ");
+                String newQuestion = scanner.nextLine();
+                System.out.print("Enter New Answer: ");
+                String newAnswer = scanner.nextLine();
 
-            question.question = newQuestion;
-            question.answer = newAnswer;
-            System.out.println("Question updated successfully.");
-        } else {
-            System.out.println("Invalid question number.");
+                question.setQuestion(newQuestion);
+                question.setAnswer(newAnswer);
+                System.out.println("Question updated successfully.");
+            } else {
+                System.out.println("Invalid question number.");
+            }
+        } catch (InputMismatchException e) {
+            System.out.println("Invalid input. Please try again.");
+            scanner.nextLine(); 
         }
     }
 
     static void deleteQuizQuestion(Scanner scanner) {
-        System.out.print("Enter Quiz ID to delete questions: ");
-        String quizId = scanner.next();
-        scanner.nextLine();
+        try {
+            System.out.print("Enter Quiz ID to delete questions: ");
+            String quizId = scanner.next();
+            scanner.nextLine();
 
-        List<Question> quizQuestions = getQuestionsByQuizId(quizId);
-        if (quizQuestions.isEmpty()) {
-            System.out.println("Quiz ID not found: " + quizId);
-            return;
-        }
+            List<Question> quizQuestions = getQuestionsByQuizId(quizId);
+            if (quizQuestions.isEmpty()) {
+                System.out.println("Quiz ID not found: " + quizId);
+                return;
+            }
 
-        for (int i = 0; i < quizQuestions.size(); i++) {
-            System.out.println((i + 1) + ". " + quizQuestions.get(i).question);
-        }
+            for (int i = 0; i < quizQuestions.size(); i++) {
+                System.out.println((i + 1) + ". " + quizQuestions.get(i).question);
+            }
 
-        System.out.print("Enter the question number to delete: ");
-        int questionIndex = scanner.nextInt() - 1;
-        scanner.nextLine();
+            System.out.print("Enter the question number to delete: ");
+            int questionIndex = scanner.nextInt() - 1;
+            scanner.nextLine();
 
-        if (questionIndex >= 0 && questionIndex < quizQuestions.size()) {
-            questions.remove(quizQuestions.get(questionIndex));
-            System.out.println("Question deleted successfully.");
-        } else {
-            System.out.println("Invalid question number.");
+            if (questionIndex >= 0 && questionIndex < quizQuestions.size()) {
+                questions.remove(quizQuestions.get(questionIndex));
+                System.out.println("Question deleted successfully.");
+            } else {
+                System.out.println("Invalid question number.");
+            }
+        } catch (InputMismatchException e) {
+            System.out.println("Invalid input. Please try again.");
+            scanner.nextLine(); 
         }
     }
 
     static List<Question> getQuestionsByQuizId(String quizId) {
         List<Question> quizQuestions = new ArrayList<>();
         for (Question question : questions) {
-            if (question.quizId.equals(quizId)) {
+            if (question.getQuizId().equals(quizId)) {
                 quizQuestions.add(question);
             }
         }
         return quizQuestions;
     }
+
 
     static void viewAllQuestions(String quizId) {
         List<Question> quizQuestions = getQuestionsByQuizId(quizId);
@@ -166,7 +225,7 @@ class QuizSystem {
         System.out.println("| NO. | QUESTION                            | ANSWER              |");
         System.out.println("+-----+-------------------------------------+---------------------+");
         for (int i = 0; i < quizQuestions.size(); i++) {
-            System.out.printf("| %-3d | %-35s | %-19s |\n", i + 1, quizQuestions.get(i).question, quizQuestions.get(i).answer);
+            System.out.printf("| %-3d | %-35s | %-19s |\n", i + 1, quizQuestions.get(i).getQuestion(), quizQuestions.get(i).getAnswer());
         }
     }
 
@@ -233,28 +292,15 @@ class QuizSystem {
         String dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
         for (Question question : quizQuestions) {
-            System.out.println("+---------------------------------------+");
-            System.out.println("| " + question.question);
-            System.out.println("+---------------------------------------+");
-
-            System.out.print("Your answer: ");
+            System.out.println(question.getQuestion());
             String userAnswer = scanner.nextLine();
-
-            if (userAnswer.equals(question.answer)) {
+            if (userAnswer.equalsIgnoreCase(question.getAnswer())) {
                 score++;
             }
         }
 
         results.add(new Result(userId, quizId, score, dateStr));
-        System.out.println("You scored " + score + " out of " + quizQuestions.size() + " on the quiz.");
-    }
-
-    static void resetPassword(int userId, String newPassword) {
-        users.stream()
-                .filter(user -> user.id == userId)
-                .findFirst()
-                .ifPresent(user -> user.password = newPassword);
-        System.out.println("Password updated successfully.");
+        System.out.println("Quiz completed. Your score is: " + score);
     }
 
     static void signUpAdmin(String username, String password) {
@@ -262,10 +308,8 @@ class QuizSystem {
             System.out.println("Username already exists.");
             return;
         }
-
-        User newAdmin = new User(nextUserId++, username, password, true);
-        users.add(newAdmin);
-        System.out.println("Admin account created successfully.");
+        users.add(new Admin(nextUserId++, username, password));
+        System.out.println("Admin signed up successfully.");
     }
 
     static void signUpUser(String username, String password) {
@@ -273,17 +317,15 @@ class QuizSystem {
             System.out.println("Username already exists.");
             return;
         }
-
-        User newUser = new User(nextUserId++, username, password, false);
-        users.add(newUser);
-        System.out.println("User account created successfully.");
+        users.add(new User(nextUserId++, username, password));
+        System.out.println("User signed up successfully.");
     }
 
     static void loginAdmin(String username, String password) {
         if (authenticateAdmin(username, password)) {
             System.out.println("Admin login successful.");
         } else {
-            System.out.println("Invalid username or password for admin.");
+            System.out.println("Invalid admin credentials.");
         }
     }
 
@@ -291,35 +333,27 @@ class QuizSystem {
         if (authenticateUser(username, password)) {
             System.out.println("User login successful.");
         } else {
-            System.out.println("Invalid username or password for user.");
+            System.out.println("Invalid user credentials.");
         }
     }
 
-    // Admin Menu
     static void menuAdmin(Scanner scanner) {
-        while (true) {
-            System.out.println("+----------------------------------------+");
-            System.out.println("| ************** Admin Menu ************ |");
-            System.out.println("+----------------------------------------+");
-            System.out.println("| 1. Add Question                        |");
-            System.out.println("| 2. Edit Question                       |");
-            System.out.println("| 3. Delete Question                     |");
-            System.out.println("| 4. View All Questions                  |");
-            System.out.println("| 5. View Scores                         |");
-            System.out.println("| 6. Generate Report                     |");
-            System.out.println("| 7. Logout                              |");
-            System.out.println("+----------------------------------------+");
-
-            System.out.print("Enter your choice: ");
-            int choice = -1;
-            try {
-                choice = scanner.nextInt();
-                scanner.nextLine(); // Consume the newline
-            } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Please enter a valid number.");
-                scanner.nextLine(); // Consume invalid input
-                continue;
-            }
+        int choice;
+        do {
+            System.out.println("+----------------------------------+");
+            System.out.println("| ******** Admin Menu ************ |");
+            System.out.println("+----------------------------------+");
+            System.out.println("| 1. Add Quiz Question            |");
+            System.out.println("| 2. Edit Quiz Question           |");
+            System.out.println("| 3. Delete Quiz Question         |");
+            System.out.println("| 4. View All Questions           |");
+            System.out.println("| 5. View Scores                  |");
+            System.out.println("| 6. Generate Report              |");
+            System.out.println("| 7. Logout                       |");
+            System.out.println("+----------------------------------+");
+            System.out.print("Choose option: ");
+            choice = scanner.nextInt();
+            scanner.nextLine();
 
             switch (choice) {
                 case ADD_QUESTION:
@@ -330,6 +364,7 @@ class QuizSystem {
                     System.out.print("Enter Answer: ");
                     String answer = scanner.nextLine();
                     addQuizQuestion(quizId, question, answer);
+                    System.out.println("Question added.");
                     break;
 
                 case EDIT_QUESTION:
@@ -342,14 +377,14 @@ class QuizSystem {
 
                 case VIEW_ALL_QUESTIONS:
                     System.out.print("Enter Quiz ID: ");
-                    String quizIdToView = scanner.nextLine();
-                    viewAllQuestions(quizIdToView);
+                    quizId = scanner.nextLine();
+                    viewAllQuestions(quizId);
                     break;
 
                 case VIEW_SCORES:
                     System.out.print("Enter Quiz ID: ");
-                    String quizIdForScores = scanner.nextLine();
-                    viewScores(quizIdForScores);
+                    quizId = scanner.nextLine();
+                    viewScores(quizId);
                     break;
 
                 case GENERATE_REPORT:
@@ -357,37 +392,29 @@ class QuizSystem {
                     break;
 
                 case ADMIN_LOGOUT:
-                    System.out.println("Logging out...");
-                    return;
+                    System.out.println("Admin logged out.");
+                    break;
 
                 default:
-                    System.out.println("Invalid choice, please try again.");
+                    System.out.println("Invalid choice. Try again.");
             }
-        }
+        } while (choice != ADMIN_LOGOUT);
     }
 
-    // User Menu
     static void menuUser(Scanner scanner, int userId) {
-        while (true) {
-            System.out.println("+----------------------------------------+");
-            System.out.println("| ************** User Menu ************* |");
-            System.out.println("+----------------------------------------+");
-            System.out.println("| 1. Take Quiz                           |");
-            System.out.println("| 2. View Scores                         |");
-            System.out.println("| 3. Reset Password                      |");
-            System.out.println("| 4. Logout                              |");
-            System.out.println("+----------------------------------------+");
-
-            System.out.print("Enter your choice: ");
-            int choice = -1;
-            try {
-                choice = scanner.nextInt();
-                scanner.nextLine(); // Consume the newline
-            } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Please enter a valid number.");
-                scanner.nextLine(); // Consume invalid input
-                continue;
-            }
+        int choice;
+        do {
+            System.out.println("+----------------------------------+");
+            System.out.println("| ******** User Menu ************* |");
+            System.out.println("+----------------------------------+");
+            System.out.println("| 1. Take Quiz                    |");
+            System.out.println("| 2. View Scores                  |");
+            System.out.println("| 3. Reset Password               |");
+            System.out.println("| 4. Logout                       |");
+            System.out.println("+----------------------------------+");
+            System.out.print("Choose option: ");
+            choice = scanner.nextInt();
+            scanner.nextLine();
 
             switch (choice) {
                 case TAKE_QUIZ:
@@ -403,102 +430,85 @@ class QuizSystem {
                 case RESET_PASSWORD:
                     System.out.print("Enter new password: ");
                     String newPassword = scanner.nextLine();
-                    resetPassword(userId, newPassword);
+                    users.stream().filter(u -> u.id == userId).forEach(u -> u.password = newPassword);
+                    System.out.println("Password updated successfully.");
                     break;
 
                 case USER_LOGOUT:
-                    System.out.println("Logging out...");
-                    return;
+                    System.out.println("User logged out.");
+                    break;
 
                 default:
-                    System.out.println("Invalid choice, please try again.");
+                    System.out.println("Invalid choice. Try again.");
             }
-        }
+        } while (choice != USER_LOGOUT);
     }
 
-    // Main Menu
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-
-        while (true) {
-            System.out.println("+----------------------------------------+");
-            System.out.println("| ************ Main Menu *************** |");
-            System.out.println("+----------------------------------------+");
-            System.out.println("| 1. Admin Signup                        |");
-            System.out.println("| 2. User Signup                         |");
-            System.out.println("| 3. Admin Login                         |");
-            System.out.println("| 4. User Login                          |");
-            System.out.println("| 5. Exit                                |");
-            System.out.println("+----------------------------------------+");
-
-            System.out.print("Enter your choice: ");
-            int choice = -1;
+        int choice;
+        do {
             try {
+                System.out.println("+-----------------------------+");
+                System.out.println("| ********** Main Menu ********* |");
+                System.out.println("+-----------------------------+");
+                System.out.println("| 1. Admin SignUp             |");
+                System.out.println("| 2. User SignUp              |");
+                System.out.println("| 3. Admin Login              |");
+                System.out.println("| 4. User Login               |");
+                System.out.println("| 5. Exit                     |");
+                System.out.println("+-----------------------------+");
+
+                System.out.print("Enter choice: ");
                 choice = scanner.nextInt();
-                scanner.nextLine(); // Consume the newline
+                scanner.nextLine();
+
+                switch (choice) {
+                    case SIGNUP_ADMIN:
+                        System.out.print("Enter username: ");
+                        String adminUsername = scanner.nextLine();
+                        System.out.print("Enter password: ");
+                        String adminPassword = scanner.nextLine();
+                        signUpAdmin(adminUsername, adminPassword);
+                        break;
+
+                    case SIGNUP_USER:
+                        System.out.print("Enter username: ");
+                        String userUsername = scanner.nextLine();
+                        System.out.print("Enter password: ");
+                        String userPassword = scanner.nextLine();
+                        signUpUser(userUsername, userPassword);
+                        break;
+
+                    case LOGIN_ADMIN:
+                        System.out.print("Enter username: ");
+                        String loginAdminUsername = scanner.nextLine();
+                        System.out.print("Enter password: ");
+                        String loginAdminPassword = scanner.nextLine();
+                        loginAdmin(loginAdminUsername, loginAdminPassword);
+                        break;
+
+                    case LOGIN_USER:
+                        System.out.print("Enter username: ");
+                        String loginUserUsername = scanner.nextLine();
+                        System.out.print("Enter password: ");
+                        String loginUserPassword = scanner.nextLine();
+                        loginUser(loginUserUsername, loginUserPassword);
+                        break;
+
+                    case EXIT:
+                        System.out.println("Exiting application.");
+                        break;
+
+                    default:
+                        System.out.println("Invalid choice. Try again.");
+                }
             } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Please enter a valid number.");
-                scanner.nextLine(); // Consume invalid input
-                continue;
+                System.out.println("Invalid input. Please enter a number.");
+                scanner.nextLine();
+                choice = -1;
             }
-
-            switch (choice) {
-                case SIGNUP_ADMIN:
-                    System.out.print("Enter Username: ");
-                    String adminUsername = scanner.nextLine();
-                    System.out.print("Enter Password: ");
-                    String adminPassword = scanner.nextLine();
-                    signUpAdmin(adminUsername, adminPassword);
-                    break;
-
-                case SIGNUP_USER:
-                    System.out.print("Enter Username: ");
-                    String userUsername = scanner.nextLine();
-                    System.out.print("Enter Password: ");
-                    String userPassword = scanner.nextLine();
-                    signUpUser(userUsername, userPassword);
-                    break;
-
-                case LOGIN_ADMIN:
-                    System.out.print("Enter Username: ");
-                    String loginAdminUsername = scanner.nextLine();
-                    System.out.print("Enter Password: ");
-                    String loginAdminPassword = scanner.nextLine();
-                    if (authenticateAdmin(loginAdminUsername, loginAdminPassword)) {
-                        System.out.println("Admin login successful.");
-                        menuAdmin(scanner);
-                    } else {
-                        System.out.println("Invalid username or password for admin.");
-                    }
-                    break;
-
-                case LOGIN_USER:
-                    System.out.print("Enter Username: ");
-                    String loginUserUsername = scanner.nextLine();
-                    System.out.print("Enter Password: ");
-                    String loginUserPassword = scanner.nextLine();
-                    if (authenticateUser(loginUserUsername, loginUserPassword)) {
-                        System.out.println("User login successful.");
-                        // Find user ID
-                        int userId = users.stream()
-                            .filter(u -> u.username.equals(loginUserUsername))
-                            .findFirst()
-                            .get()
-                            .id;
-                        menuUser(scanner, userId);
-                    } else {
-                        System.out.println("Invalid username or password for user.");
-                    }
-                    break;
-
-                case EXIT:
-                    System.out.println("Exiting the system.");
-                    scanner.close();
-                    return;
-
-                default:
-                    System.out.println("Invalid option. Try again.");
-            }
-        }
+        } while (choice != EXIT);
     }
 }
