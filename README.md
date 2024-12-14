@@ -1,9 +1,10 @@
 # QuizCraft: The Comprehensive Interactive Test System
-
+## Project Overview:
 The QuizCraft: The Comprehensive Interactive Test System is a Java-based application designed to streamline quiz creation, management, and participation. This program features distinct functionalities for administrators and users, promoting efficient quiz administration and interactive user experiences. The system supports secure logins, result tracking, and score visualization.
+
 ## Features
 
-### Admin Features:
+### Admin:
 - **Add Questions**: Admins can add new quiz questions with associated answers.
 - **Edit Questions**: Admins can modify existing questions for a specific quiz.
 - **Delete Questions**: Admins can remove questions from a specific quiz.
@@ -12,7 +13,7 @@ The QuizCraft: The Comprehensive Interactive Test System is a Java-based applica
 - **Generate Reports**: Admins can generate a detailed report of quiz results, showing user names, quiz IDs, scores, and the dates the quizzes were taken.
 - **Admin Logout**: Admins can log out of the system.
 
-### User Features:
+### User:
 - **Take Quiz**: Users can take a quiz by answering the questions.
 - **View Scores**: Users can view their past quiz scores.
 - **Reset Password**: Users can reset their password.
@@ -23,6 +24,7 @@ The QuizCraft: The Comprehensive Interactive Test System is a Java-based applica
 - **User Signup**: Users can sign up by providing a username and password.
 - **Admin Login**: Admins can log in using their credentials.
 - **User Login**: Users can log in using their credentials.
+  
 ## Application of OOP Principles  
 This project employs the following Object-Oriented Programming (OOP) principles:  
 
