@@ -1,7 +1,6 @@
 # QuizCraft: The Comprehensive Interactive Test System
 
-This Java-based Comprehensive Interactive Test System provides functionality for both administrators and users. The system supports operations like creating, editing, deleting, and viewing quiz questions, as well as managing user accounts and tracking quiz results. It also includes features like generating reports and resetting passwords.
-
+The QuizCraft: The Comprehensive Interactive Test System is a Java-based application designed to streamline quiz creation, management, and participation. This program features distinct functionalities for administrators and users, promoting efficient quiz administration and interactive user experiences. The system supports secure logins, result tracking, and score visualization.
 ## Features
 
 ### Admin Features:
@@ -24,42 +23,52 @@ This Java-based Comprehensive Interactive Test System provides functionality for
 - **User Signup**: Users can sign up by providing a username and password.
 - **Admin Login**: Admins can log in using their credentials.
 - **User Login**: Users can log in using their credentials.
+## Application of OOP Principles  
+This project employs the following Object-Oriented Programming (OOP) principles:  
 
-## Structure and Classes
+### 1. **Encapsulation**  
+- All data members such as `questions`, `users`, and `results` are private, ensuring controlled access through getter and setter methods.  
+- The `Person` class encapsulates user-specific properties (`id`, `username`, `password`).  
 
-### `Question` Class
-Represents a single quiz question. Each `Question` object contains:
-- `quizId`: The identifier for the quiz.
-- `question`: The text of the question.
-- `answer`: The correct answer for the question.
+### 2. **Inheritance**  
+- The `Admin` and `User` classes inherit common attributes and methods from the abstract `Person` class, reducing redundancy.  
 
-### `User` Class
-Represents a user in the system. Each `User` object contains:
-- `id`: The unique ID for the user.
-- `username`: The username of the user.
-- `password`: The password of the user.
-- `isAdmin`: A boolean value indicating whether the user is an admin.
+### 3. **Polymorphism**  
+- The abstract method `menu()` is overridden in both `Admin` and `User` classes to define role-specific functionalities.  
 
-### `Result` Class
-Represents a user's quiz result. Each `Result` object contains:
-- `userId`: The ID of the user who took the quiz.
-- `quizId`: The ID of the quiz.
-- `score`: The score the user achieved on the quiz.
-- `dateTaken`: The date and time when the quiz was taken.
+### 4. **Abstraction**  
+- The `Person` class is declared abstract to provide a base structure while hiding implementation details from subclasses.  
 
-### `QuizSystem` Class
-The main class that handles the quiz logic. It includes methods to:
-- Add, edit, and delete quiz questions.
-- Authenticate users and admins.
-- Track quiz scores and results.
-- Generate reports.
-- Handle user interactions in the menu system.
+---
 
-## Dependencies
-- Java 8 or higher for `java.time.LocalDateTime` and `java.util.Scanner`.
-- No additional external libraries are required.
+## Sustainable Development Goal (SDG) Integration  
+### Chosen SDG: **Quality Education (SDG 4)**  
+This project aligns with SDG 4 by promoting:  
+- Accessible, engaging, and organized quiz systems to enhance the learning experience.  
+- A platform for users to improve knowledge retention through interactive assessments.  
+- Secure and transparent scoring to motivate continuous learning.  
 
+---
 
+## Instructions for Running the Program  
+
+1. **Prerequisites**  
+   - Ensure you have Java Development Kit (JDK) installed on your system.  
+   - Recommended version: JDK 8 or higher.  
+
+2. **Clone the Repository**  
+   Run the following command in your terminal to clone this repository:  
+   ```bash  
+   git clone [https://github.com/kelleeerrrr/QuizCraft.git]
+
+3. **Compile the Program**
+   Navigate to the project directory and compile the code using:
+   ```bash
+   javac QuizCraft.java  
+4. **Run the Program**
+   Execute the program by entering:
+   ```bash
+   java QuizCraft  
 ## Contributor
  
 | Name                         | Role       | Email                         |
